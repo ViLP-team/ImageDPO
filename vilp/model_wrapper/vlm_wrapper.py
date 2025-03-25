@@ -7,8 +7,8 @@ class VLM_wrapper(BasePredictor):
     def __init__(
         self,
         model_type="llava",
-        checkpoint_path="liuhaotian/llava-v1.5-13b",
-        model_name="llava-v1.5-13b",
+        checkpoint_path="liuhaotian/llava-v1.5-7b",
+        model_name="llava-v1.5-7b",
         conv_mode="llama_3",
     ):
         # because the very messy environment between different vlms, we only import them if necessary

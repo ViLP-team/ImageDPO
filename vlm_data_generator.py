@@ -53,8 +53,7 @@ PROFILE = True
 CURPATH = os.path.dirname(os.path.abspath(__file__))
 
 # TODO: change this
-OUTPUT_PATH = os.path.join(CURPATH, "results")
-
+DATA_PATH = ""
 # TODO: use your own API key
 client = OpenAI(api_key="")
 
@@ -63,7 +62,7 @@ client = OpenAI(api_key="")
 def get_folder_path(args):
     FOLDERS = glob.glob(
         os.path.join(
-            OUTPUT_PATH, f"results_{args.dataset_name}{args.llava_checkpoint}", "*"
+            DATA_PATH, f"results_{args.dataset_name}{args.llava_checkpoint}", "*"
         )
     )
     return FOLDERS
@@ -71,7 +70,7 @@ def get_folder_path(args):
 
 def define_dir_path(args):
     DIRPATH = os.path.join(
-        OUTPUT_PATH, f"results_{args.dataset_name}{args.llava_checkpoint}"
+        DATA_PATH, f"results_{args.dataset_name}{args.llava_checkpoint}"
     )
     return DIRPATH
 
@@ -829,19 +828,19 @@ def get_parser():
     group.add_argument(
         "--vlm_model_type",
         type=str,
-        default="cambrian",
+        default="llava",
         help="vlm model type",
     )
     group.add_argument(
         "--vlm_model_checkpoint",
         type=str,
-        default="nyu-visionx/cambrian-8b",
+        default="liuhaotian/llava-v1.5-7b",
         help="vlm model checkpoint",
     )
     group.add_argument(
         "--vlm_model_name",
         type=str,
-        default="cambrian-8b",
+        default="llava-v1.5-7b",
         help="vlm model name",
     )
     group.add_argument(
@@ -853,7 +852,7 @@ def get_parser():
     group.add_argument(
         "--llava_checkpoint",
         type=str,
-        default="cambrian",
+        default="liuhaotian/llava-v1.5-7b",
         help="path to checkpoint file",
     )
     group.add_argument(
