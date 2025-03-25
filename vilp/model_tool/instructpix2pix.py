@@ -4,14 +4,14 @@ import shlex
 import torch
 
 try:
-    from vilp.model_warper.intructp2p_warper import InstructPix2Pix_Warper
+    from vilp.model_wrapper.intructp2p_wrapper import InstructPix2Pix_wrapper
 except:
-    print("cannot import InstructPix2Pix_Warper")
+    print("cannot import InstructPix2Pix_wrapper")
 
 
 class InstructPix2Pix:
     def __init__(self, args):
-        self.model = InstructPix2Pix_Warper()
+        self.model = InstructPix2Pix_wrapper()
 
     @classmethod
     def get_instruction_prompt(self, main_instructions, org_description):

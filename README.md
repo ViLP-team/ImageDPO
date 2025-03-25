@@ -9,4 +9,28 @@ Our pipeline comprises three primary components:
 3. ImageDPO Training: Utilizing these synthesized and corrupted image-QA pairs for finetuning VLMs with our proposed ImageDPO objective.
 
 
+# 1. Environment Install
+
+```bash
+    conda create -n vilp python=3.10 -y
+    conda activate vilp
+    python -m pip install --upgrade pip
+```
+
+
+## 1. Install according to LLava
+```bash
+    cd external/LLaVA-Plus
+
+    python -m pip install -e .
+    python -m pip install -e ".[train]"
+    python -m pip install git+https://github.com/Dao-AILab/flash-attention.git@v2.6.3
+```
+## 2.(Optional) Install Image Editing tool
+We use [GroundSAM](https://github.com/IDEA-Research/Grounded-Segment-Anything), [instruct-pix2pix](https://github.com/timothybrooks/instruct-pix2pix), and [Stable-Diffusion-XL](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0) to generate new images. If you are interested in generating data by yourself, feel free to follow the install instructions. 
+Otherwise you can skip the following steps. 
+
+
+# 2. Train Image DPO
+
 

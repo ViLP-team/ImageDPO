@@ -7,9 +7,9 @@ from IPython import embed
 from PIL import Image, ImageDraw, ImageFont
 
 try:
-    from vilp.model_warper.ground_sam import GroundSam_Warper
+    from vilp.model_wrapper.ground_sam import GroundSam_wrapper
 except:
-    print("cannot import GroundSam_Warper")
+    print("cannot import GroundSam_wrapper")
 
 
 class GroundingDINO:
