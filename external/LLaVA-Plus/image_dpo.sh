@@ -1,7 +1,13 @@
 
-DATA_PATH="data/image_dpo_llava_7b_all_80_blur_64_pixelate_corrupted_80k.json"
-IMAGE_FOLDER="data/image_dpo_llava_7b_all_80_blur_64_pixelate_corrupted_80k"
+# DATA_PATH="JSON FILE PATH"
+# IMAGE_FOLDER="IMAGE FOLDER PATH"
+# run_name="RUN NAME"
+
+
+DATA_PATH=/nfs/turbo/justincj-turbo/ancao/repos/ImprovingVLM/util_scripts/image_dpo_cambrian_8b_all_False_20_16_corrupted_score5_80k.json
+IMAGE_FOLDER=/nfs/turbo/justincj-turbo/tiangel/improvingVLM/
 run_name=llava-7b-image-dpo-all-80-blur-64-pixelate-corrupted-80k-lora
+
 ouput_dir=./checkpoints/${run_name}
 # Notice that I am loading the latest model checkopint 
 model_name=liuhaotian/llava-v1.5-7b # Use the previous model checkpoint

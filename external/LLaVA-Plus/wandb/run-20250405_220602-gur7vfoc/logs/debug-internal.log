@@ -1,0 +1,7 @@
+{"time":"2025-04-05T22:06:02.987638126-04:00","level":"INFO","msg":"stream: starting","core version":"0.19.9","symlink path":"/nfs/turbo/justincj-turbo/ancao/repos/ImageDPO/external/LLaVA-Plus/wandb/run-20250405_220602-gur7vfoc/logs/debug-core.log"}
+{"time":"2025-04-05T22:06:03.265039381-04:00","level":"INFO","msg":"created new stream","id":"gur7vfoc"}
+{"time":"2025-04-05T22:06:03.265058724-04:00","level":"INFO","msg":"stream: started","id":"gur7vfoc"}
+{"time":"2025-04-05T22:06:03.265068692-04:00","level":"INFO","msg":"writer: Do: started","stream_id":"gur7vfoc"}
+{"time":"2025-04-05T22:06:03.26507465-04:00","level":"INFO","msg":"sender: started","stream_id":"gur7vfoc"}
+{"time":"2025-04-05T22:06:03.265083066-04:00","level":"INFO","msg":"handler: started","stream_id":"gur7vfoc"}
+{"time":"2025-04-05T22:06:03.374306125-04:00","level":"INFO","msg":"Starting system monitor"}

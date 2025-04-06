@@ -55,22 +55,23 @@ def main(name=None):
         start = torch.cuda.Event(enable_timing=True)
         end = torch.cuda.Event(enable_timing=True)
 
-    prompt_text = """Given this image, please suggest a range of creative edits, tasks, or transformations that could be applied using advanced image processing tools. These tasks may include artistic transformations, vivid color adjustments, object detection and modification, or completely creating a new image inspired by the original. Specify which tool would be best suited for each task, choosing from Stable Diffusion for image generation, InstructPix2Pix for image modification, or GroundingDINO for object modification.
-            Your recommendations should help in understanding the potential of the image and exploring creative possibilities.
+    prompt_text = """
+        Given this image, please suggest a range of creative edits, tasks, or transformations that could be applied using advanced image processing tools. These tasks may include artistic transformations, vivid color adjustments, object detection and modification, or completely creating a new image inspired by the original. Specify which tool would be best suited for each task, choosing from Stable Diffusion for image generation, InstructPix2Pix for image modification, or GroundingDINO for object modification.
+        Your recommendations should help in understanding the potential of the image and exploring creative possibilities.
 
-            Expected Response Format:
-            Item Number: 1
-            Tool Used: [Specify the tool - Stable Diffusion or InstructPix2Pix or GroundingDINO]
-            Text Prompt for Processing: [Detailed description of the task or transformation to be performed. For image generation, please provide complete description based on the understanding of the provided images, since we only feed text prompt for this task.] 
+        Expected Response Format:
+        Item Number: 1
+        Tool Used: [Specify the tool - Stable Diffusion or InstructPix2Pix or GroundingDINO]
+        Text Prompt for Processing: [Detailed description of the task or transformation to be performed. For image generation, please provide complete description based on the understanding of the provided images, since we only feed text prompt for this task.] 
 
-            Item Number: 2
-            Tool Used: [Specify the tool - Stable Diffusion or InstructPix2Pix or GroundingDINO]
-            Text Prompt for Processing: [Detailed description of the task or transformation to be performed. For image generation, please provide complete description based on the understanding of the provided images, since we only feed text prompt for this task.] 
+        Item Number: 2
+        Tool Used: [Specify the tool - Stable Diffusion or InstructPix2Pix or GroundingDINO]
+        Text Prompt for Processing: [Detailed description of the task or transformation to be performed. For image generation, please provide complete description based on the understanding of the provided images, since we only feed text prompt for this task.] 
 
-            Item Number: 3
-            Tool Used: [Specify the tool - Stable Diffusion or InstructPix2Pix or GroundingDINO]
-            Text Prompt for Processing: [Detailed description of the task or transformation to be performed. For image generation, please provide complete description based on the understanding of the provided images, since we only feed text prompt for this task.] 
-            """
+        Item Number: 3
+        Tool Used: [Specify the tool - Stable Diffusion or InstructPix2Pix or GroundingDINO]
+        Text Prompt for Processing: [Detailed description of the task or transformation to be performed. For image generation, please provide complete description based on the understanding of the provided images, since we only feed text prompt for this task.] 
+        """
     caption_prompt = "describe the image in details"
     batch_accumulator = 0
     image_path_collect = []

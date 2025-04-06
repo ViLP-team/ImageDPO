@@ -15,6 +15,8 @@ Our pipeline comprises three primary components:
     conda create -n vilp python=3.10 -y
     conda activate vilp
     python -m pip install --upgrade pip
+
+    python -m pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu118
 ```
 
 
@@ -25,12 +27,28 @@ Our pipeline comprises three primary components:
     python -m pip install -e .
     python -m pip install -e ".[train]"
     python -m pip install git+https://github.com/Dao-AILab/flash-attention.git@v2.6.3
+
+    python -m pip install datasets
+    python -m pip install tyro
 ```
-## 2.(Optional) Install Image Editing tool
+## 2.(Optional) Prepare Image DPO Data
+
+You can directly download our data from [huggingface](https://huggingface.co/datasets/ViLP/ImageDPO/tree/main) and skip this step. 
+But we provide the code for processing in below if you are interested. 
+
+### 2.1 
 We use [GroundSAM](https://github.com/IDEA-Research/Grounded-Segment-Anything), [instruct-pix2pix](https://github.com/timothybrooks/instruct-pix2pix), and [Stable-Diffusion-XL](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0) to generate new images. If you are interested in generating data by yourself, feel free to follow the install instructions. 
 Otherwise you can skip the following steps. 
 
 
-# 2. Train Image DPO
+# 3. Train Image DPO
+After downloading the image DPO data, you can train the image dpo following our proposed algorithms. 
+
+```
+    cd  external/LLaVA-Plus
+```
+
+Modify the 'DATA_PATH', 'IMAGE_FOLDER' and 'run_name' in 'image_dpo.sh',
+also modify the training setting based on your experimental setting, in particularly lora settings ("lora_r", "lora_alpha"), "learning_rate", "gradient_accumulation_steps".  
 
 
