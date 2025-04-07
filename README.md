@@ -87,7 +87,12 @@ Basically, we ask VLMs to look at the seed images (from coco/textvqa/VG dataset)
     python vlm_data_generator.py --task rating_singleQA_sampleNewQA 
 ```
 
+### 2.6 Corrupt the image for Image DPO
 
+```
+    python corrupt_image.py --
+
+```
 
 
 # 3. Train Image DPO
