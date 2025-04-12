@@ -13,21 +13,18 @@ class VLM_wrapper(BasePredictor):
     ):
         # because the very messy environment between different vlms, we only import them if necessary
         if model_type == "llava":
-            from ivlm.model_wrapper.llava_wrapper import Predictor
+            from vilp.model_wrapper.llava_wrapper import Predictor
 
             self.predictor = Predictor()
             self.predictor.setup(checkpoint_path, model_name)
         elif model_type == "cambrian":
-            from ivlm.model_wrapper.cambrian_wrapper import Cambrian_Predictor
+            raise NotImplementedError("Cambrian is not implemented yet")
+            # from vilp.model_wrapper.cambrian_wrapper import Cambrian_Predictor
 
-            self.predictor = Cambrian_Predictor()
-            self.predictor.setup(checkpoint_path, model_name, conv_mode)
-        elif model_type == "mgm":
-            # mini-gemini
-            from ivlm.model_wrapper.mgm_wrapper import MGM_Predictor
-
-            self.predictor = MGM_Predictor()
-            self.predictor.setup(checkpoint_path, model_name)
+            # self.predictor = Cambrian_Predictor()
+            # self.predictor.setup(checkpoint_path, model_name, conv_mode)
+        else:
+            raise ValueError("Unknown model type")
 
     def predict(
         self,

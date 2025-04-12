@@ -79,6 +79,7 @@ def main(name=None):
     instruction_prompt_collect = []
     caption_prompt_collect = []
     batch_count = 0
+
     for folder in cur_train_path:
         save_dir = os.path.join(
             OUTPUT_PATH,
