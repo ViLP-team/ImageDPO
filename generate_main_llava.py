@@ -21,7 +21,7 @@ from vilp.utils.re_utils import generate_instruction
 # TODO: Change the parameters as needed
 PROFILE = True
 BATCH_SIZE = 5
-IF_7B = False
+IF_7B = True
 DATASET_NAME = "vg"
 # OUTPUT_PATH = os.path.join("/your/path/to/output", f"{DATASET_NAME}_output")
 OUTPUT_PATH = "./results"
@@ -89,7 +89,7 @@ def main(name=None):
             if os.path.exists(os.path.join(save_dir, "all_instructions_7b.json")):
                 continue
         else:
-            if os.path.exists(os.path.join(save_dir, "all_instructions.json")):
+            if os.path.exists(os.path.join(save_dir, "all_instructions_13b.json")):
                 continue
         save_dir_collect.append(save_dir)
         os.makedirs(save_dir, exist_ok=True, mode=0o777)
@@ -131,11 +131,10 @@ def main(name=None):
                 print(f"{i}   !!!!!!!!!!!!!!!!!!!!!!!!")
                 continue
 
-            if not IF_7B:
-                shutil.copyfile(
-                    image_path_collect[i],
-                    os.path.join(save_dir_collect[i], "origin.jpg"),
-                )
+            shutil.copyfile(
+                image_path_collect[i],
+                os.path.join(save_dir_collect[i], "origin.jpg"),
+            )
 
             if len(save_dir_collect[i]) > 0:
                 if IF_7B:
@@ -146,7 +145,8 @@ def main(name=None):
                         json.dump(parsed_results, f, indent=4)
                 else:
                     with open(
-                        os.path.join(save_dir_collect[i], "all_instructions.json"), "w"
+                        os.path.join(save_dir_collect[i], "all_instructions_13b.json"),
+                        "w",
                     ) as f:
                         json.dump(parsed_results, f, indent=4)
 

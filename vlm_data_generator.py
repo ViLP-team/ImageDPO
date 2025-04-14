@@ -37,9 +37,8 @@ try:
     from vilp.model_warper.ground_sam import GroundSam_Warper
 except:
     print("cannot import `GroundSam_Warper`")
-from openai import OpenAI
 
-from vilp.model_warper.vlm_warper import VLM_Warper
+from vilp.model_wrapper.vlm_wrapper import VLM_wrapper
 from vilp.utils.re_utils import (
     extract_answer_rating,
     extract_justify_rating,
@@ -52,26 +51,25 @@ PROFILE = True
 
 CURPATH = os.path.dirname(os.path.abspath(__file__))
 
-# TODO: change this
-DATA_PATH = ""
-# TODO: use your own API key
-client = OpenAI(api_key="")
+
+# NOTE: TODO: need change "get_folder_path" and "define_dir_path" function
 
 
-# NOTE: TODO: need change this
 def get_folder_path(args):
-    FOLDERS = glob.glob(
-        os.path.join(
-            DATA_PATH, f"results_{args.dataset_name}{args.llava_checkpoint}", "*"
-        )
-    )
+    # FOLDERS = glob.glob(
+    #     os.path.join(
+    #         DATA_PATH, f"results_{args.dataset_name}{args.llava_checkpoint}", "*"
+    #     )
+    # )
+    FOLDERS = glob.glob("results/*")
     return FOLDERS
 
 
 def define_dir_path(args):
-    DIRPATH = os.path.join(
-        DATA_PATH, f"results_{args.dataset_name}{args.llava_checkpoint}"
-    )
+    # DIRPATH = os.path.join(
+    #     DATA_PATH, f"results_{args.dataset_name}{args.llava_checkpoint}"
+    # )
+    DIRPATH = "results"
     return DIRPATH
 
 
@@ -84,13 +82,12 @@ def instruction_gen(model_tool, args):
     if model_tool == "instructp2p" or model_tool == "sdxl":
         print("instructp2p or sdxl is not supported in instruction generation")
         return None
-    llava_model = VLM_Warper(
+    llava_model = VLM_wrapper(
         model_type=args.vlm_model_type,
         checkpoint_path=args.vlm_model_checkpoint,
         model_name=args.vlm_model_name,
         conv_mode=args.vlm_conv_mode,
     )
-
     FOLDERS = get_folder_path(args)
     # debug
     shuffle(FOLDERS)
@@ -112,15 +109,19 @@ def instruction_gen(model_tool, args):
                     os.path.join(
                         folder,
                         "*",
-                        f"{instruction_model_tool_file_name_mapper[model_tool]}_{args.llava_checkpoint}.json",
+                        f"{instruction_model_tool_file_name_mapper[model_tool]}_{args.llava_checkpoint.split('/')[-1]}.json",
                     )
                 )
             )
             > 0
         ):
             continue
-
-        instruction_file = os.path.join(folder, "all_instructions.json")
+        if args.vlm_model_name.split("-")[-1] == "7b":
+            instruction_file = os.path.join(folder, "all_instructions_7b.json")
+        elif args.vlm_model_name.split("-")[-1] == "13b":
+            instruction_file = os.path.join(folder, "all_instructions_13b.json")
+        else:
+            raise ValueError("Unknown model name")
         if not os.path.exists(instruction_file):
             continue
         try:
@@ -139,7 +140,7 @@ def instruction_gen(model_tool, args):
 
             output_path = os.path.join(
                 folder,
-                f"{results['Item Number']:02d}_{model_tool}_{args.llava_checkpoint}",
+                f"{results['Item Number']:02d}_{model_tool}_{args.llava_checkpoint.split('/')[-1]}",
             )
             if not os.path.exists(output_path):
                 os.makedirs(output_path, exist_ok=True, mode=0o777)
@@ -220,7 +221,7 @@ def instruction_gen(model_tool, args):
                 open(
                     os.path.join(
                         output_path_collect[img_index],
-                        f"{instruction_model_tool_file_name_mapper[model_tool]}_{args.llava_checkpoint}.json",
+                        f"{instruction_model_tool_file_name_mapper[model_tool]}_{args.llava_checkpoint.split('/')[-1]}.json",
                         # f"{instruction_model_tool_file_name_mapper[model_tool]}_7b.json",
                     ),
                     "w",
@@ -353,7 +354,7 @@ def single_image_QA_gen(model_tool, args):
     """
     # NOTE: not clear how to efficiently batchlize this function
 
-    llava_model = VLM_Warper(
+    llava_model = VLM_wrapper(
         model_type=args.vlm_model_type,
         checkpoint_path=args.vlm_model_checkpoint,
         model_name=args.vlm_model_name,
@@ -520,7 +521,7 @@ def rating_singleQA_sampleNewQA(args):
     """
     The function to sample a set of QA answers given the image and the questions.
     """
-    llava_model = VLM_Warper(
+    llava_model = VLM_wrapper(
         model_type=args.vlm_model_type,
         checkpoint_path=args.vlm_model_checkpoint,
         model_name=args.vlm_model_name,

@@ -29,7 +29,7 @@ Our pipeline comprises three primary components:
     python -m pip install git+https://github.com/Dao-AILab/flash-attention.git@v2.6.3
 
     python -m pip install datasets
-    python -m pip install tyro, cog
+    python -m pip install tyro, cog, diffusers==0.29.1
 ```
 ## 2.(Optional) Prepare Image DPO Data
 
