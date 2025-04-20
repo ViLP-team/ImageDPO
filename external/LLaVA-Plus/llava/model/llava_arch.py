@@ -18,7 +18,6 @@ from abc import ABC, abstractmethod
 import torch
 import torch.nn as nn
 from IPython import embed
-
 from llava.constants import (
     DEFAULT_IM_END_TOKEN,
     DEFAULT_IM_START_TOKEN,
@@ -266,14 +265,6 @@ class LlavaMetaForCausalLM(ABC):
             cur_new_input_embeds = []
             cur_new_labels = []
 
-            # text feature + image feature + text feature, why there is a text feature ahead: that's the default LLaVA prompt
-            # for i in cur_new_input_embeds:
-            #   print(i.shape)
-            # torch.Size([35, 5120])
-            # torch.Size([576, 5120])
-            # torch.Size([0, 5120])
-            # torch.Size([576, 5120])
-            # torch.Size([53, 5120])
             curbatch_image_idx = 0
             for i in range(num_images + 1):
                 cur_new_input_embeds.append(cur_input_embeds_no_im[i])

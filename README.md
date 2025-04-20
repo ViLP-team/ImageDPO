@@ -90,7 +90,7 @@ Basically, we ask VLMs to look at the seed images (from coco/textvqa/VG dataset)
 ### 2.6 Corrupt the image for Image DPO
 
 ```
-    python corrupt_image.py --
+    python corrupt_image.py --corruption_type classic
 
 ```
 
@@ -110,7 +110,7 @@ also modify the training setting based on your experimental setting, in particul
 
 # 4. TODOs
 
-- [ ] Validate Code:
+- [x] Validate Code:
     - [x] Instruction Generation. 
-    - [ ] QA sample 
-    - [ ] Rating QA
+    - [x] QA sample 
+    - [x] Rating QA

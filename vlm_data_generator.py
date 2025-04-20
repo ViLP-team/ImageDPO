@@ -265,15 +265,21 @@ def img_gen(model_tool, args):
             len(
                 glob.glob(
                     os.path.join(
-                        folder, f"*_{model_tool}_{args.llava_checkpoint}", "gen*.jpg"
+                        folder,
+                        f"*_{model_tool}_{args.llava_checkpoint.split('/')[-1]}",
+                        "gen*.jpg",
                     )
                 )
             )
             > 0
         ):
             continue
-
-        instruction_file = os.path.join(folder, "all_instructions.json")
+        if args.vlm_model_name.split("-")[-1] == "7b":
+            instruction_file = os.path.join(folder, "all_instructions_7b.json")
+        elif args.vlm_model_name.split("-")[-1] == "13b":
+            instruction_file = os.path.join(folder, "all_instructions_13b.json")
+        else:
+            raise ValueError("Unknown model name")
         if not os.path.exists(instruction_file):
             continue
         try:
@@ -290,7 +296,7 @@ def img_gen(model_tool, args):
             if result["Tool Used"] == tool_name_mapper[model_tool]:
                 output_path = os.path.join(
                     folder,
-                    f"{result['Item Number']:02d}_{model_tool}_{args.llava_checkpoint}",
+                    f"{result['Item Number']:02d}_{model_tool}_{args.llava_checkpoint.split('/')[-1]}",
                 )
 
                 os.makedirs(output_path, exist_ok=True, mode=0o777)
@@ -301,7 +307,7 @@ def img_gen(model_tool, args):
                     if not os.path.exists(
                         os.path.join(
                             output_path,
-                            f"{instruction_model_tool_file_name_mapper[model_tool]}_{args.llava_checkpoint}.json",
+                            f"{instruction_model_tool_file_name_mapper[model_tool]}_{args.llava_checkpoint.split('/')[-1]}.json",
                         )
                     ):
                         continue
@@ -311,7 +317,7 @@ def img_gen(model_tool, args):
                             open(
                                 os.path.join(
                                     output_path,
-                                    f"{instruction_model_tool_file_name_mapper[model_tool]}_{args.llava_checkpoint}.json",
+                                    f"{instruction_model_tool_file_name_mapper[model_tool]}_{args.llava_checkpoint.split('/')[-1]}.json",
                                 )
                             )
                         )
@@ -320,7 +326,7 @@ def img_gen(model_tool, args):
                             "instructions, error",
                             os.path.join(
                                 output_path,
-                                f"{instruction_model_tool_file_name_mapper[model_tool]}_{args.llava_checkpoint}.json",
+                                f"{instruction_model_tool_file_name_mapper[model_tool]}_{args.llava_checkpoint.split('/')[-1]}.json",
                             ),
                         )
                         continue
@@ -373,15 +379,14 @@ def single_image_QA_gen(model_tool, args):
     image_path_collect = []
     output_path_collect = []
     batch_accumulator = 0
-
     for folder in FOLDERS:
         if (
             len(
                 glob.glob(
                     os.path.join(
                         folder,
-                        f"*_{model_tool}_{args.llava_checkpoint}",
-                        f"single_img_QA_{args.llava_checkpoint}.json",
+                        f"*_{model_tool}_{args.llava_checkpoint.split('/')[-1]}",
+                        f"single_img_QA_{args.llava_checkpoint.split('/')[-1]}.json",
                     )
                 )
             )
@@ -389,7 +394,12 @@ def single_image_QA_gen(model_tool, args):
         ):
             continue
 
-        instruction_file = os.path.join(folder, "all_instructions.json")
+        if args.vlm_model_name.split("-")[-1] == "7b":
+            instruction_file = os.path.join(folder, "all_instructions_7b.json")
+        elif args.vlm_model_name.split("-")[-1] == "13b":
+            instruction_file = os.path.join(folder, "all_instructions_13b.json")
+        else:
+            raise ValueError("Unknown model name")
         if not os.path.exists(instruction_file):
             continue
         try:
@@ -407,7 +417,7 @@ def single_image_QA_gen(model_tool, args):
                 if not os.path.exists(
                     os.path.join(
                         folder,
-                        f"{result['Item Number']:02d}_{model_tool}_{args.llava_checkpoint}",
+                        f"{result['Item Number']:02d}_{model_tool}_{args.llava_checkpoint.split('/')[-1]}",
                     )
                 ):
                     continue
@@ -415,7 +425,7 @@ def single_image_QA_gen(model_tool, args):
                 output_images = glob.glob(
                     os.path.join(
                         folder,
-                        f"{result['Item Number']:02d}_{model_tool}_{args.llava_checkpoint}",
+                        f"{result['Item Number']:02d}_{model_tool}_{args.llava_checkpoint.split('/')[-1]}",
                         "gen*.jpg",
                     )
                 )
@@ -432,7 +442,7 @@ def single_image_QA_gen(model_tool, args):
                     output_path_collect.append(
                         os.path.join(
                             folder,
-                            f"{result['Item Number']:02d}_{model_tool}_{args.llava_checkpoint}",
+                            f"{result['Item Number']:02d}_{model_tool}_{args.llava_checkpoint.split('/')[-1]}",
                         )
                     )
                 loaded = True
@@ -449,7 +459,6 @@ def single_image_QA_gen(model_tool, args):
         if len(image_path_collect) >= args.batch_size:
             qa_result = []
             for i in range(0, len(image_path_collect), args.batch_size):
-                # qa_result += llava_model.predict_text_only_nostreaming(
                 qa_result += llava_model.predict_nostreaming(
                     image=image_path_collect[
                         i : min(i + args.batch_size, len(image_path_collect))
@@ -464,7 +473,6 @@ def single_image_QA_gen(model_tool, args):
                 )
 
         else:
-            # qa_result = llava_model.predict_text_only_nostreaming(
             qa_result = llava_model.predict_nostreaming(
                 image=image_path_collect,
                 prompt=prompt_collect,
@@ -489,7 +497,8 @@ def single_image_QA_gen(model_tool, args):
                 if len(QA_save_dict) > 0:
                     with open(
                         os.path.join(
-                            QA_save_path, f"single_img_QA_{args.llava_checkpoint}.json"
+                            QA_save_path,
+                            f"single_img_QA_{args.llava_checkpoint.split('/')[-1]}.json",
                         ),
                         "w",
                     ) as f:
@@ -500,7 +509,8 @@ def single_image_QA_gen(model_tool, args):
         if len(QA_save_dict) > 0:
             with open(
                 os.path.join(
-                    QA_save_path, f"single_img_QA_{args.llava_checkpoint}.json"
+                    QA_save_path,
+                    f"single_img_QA_{args.llava_checkpoint.split('/')[-1]}.json",
                 ),
                 "w",
             ) as f:
@@ -535,7 +545,12 @@ def rating_singleQA_sampleNewQA(args):
     DIRPATH = define_dir_path(args)
 
     qa_dicts = glob.glob(
-        os.path.join(DIRPATH, "*", "*", f"single_img_QA_{args.llava_checkpoint}.json")
+        os.path.join(
+            DIRPATH,
+            "*",
+            "*",
+            f"single_img_QA_{args.llava_checkpoint.split('/')[-1]}.json",
+        )
     )
     shuffle(qa_dicts)
 
@@ -547,7 +562,7 @@ def rating_singleQA_sampleNewQA(args):
     for cur_qa in qa_dicts:
         cur_folder = "/".join(cur_qa.split("/")[:-1])
         cur_output_path = os.path.join(
-            cur_folder, f"single_img_QA_DPO_{args.llava_checkpoint}.json"
+            cur_folder, f"single_img_QA_DPO_{args.llava_checkpoint.split('/')[-1]}.json"
         )
 
         if os.path.exists(cur_output_path):
@@ -735,7 +750,7 @@ def rating_singleQA_sampleNewQA(args):
                     with open(
                         os.path.join(
                             QA_save_path,
-                            f"single_img_QA_DPO_{args.llava_checkpoint}.json",
+                            f"single_img_QA_DPO_{args.llava_checkpoint.split('/')[-1]}.json",
                         ),
                         "w",
                     ) as f:
@@ -748,7 +763,8 @@ def rating_singleQA_sampleNewQA(args):
         if len(QA_save_dict) > 0:
             with open(
                 os.path.join(
-                    QA_save_path, f"single_img_QA_DPO_{args.llava_checkpoint}.json"
+                    QA_save_path,
+                    f"single_img_QA_DPO_{args.llava_checkpoint.split('/')[-1]}.json",
                 ),
                 "w",
             ) as f:
