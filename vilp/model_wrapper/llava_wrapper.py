@@ -599,6 +599,7 @@ class Predictor(BasePredictor):
         ),
         num_beams: int = 1,
         use_bf16: bool = False,  # use bf16 instead of FP16, might prevent inf or negative sampling
+        parallel: bool = False,  # the function will process all requests in parallel. NOTE: there is a bug because of different text length in the batch.
     ) -> ConcatenateIterator[str]:
         """Run a single prediction on the model without streaming."""
 
@@ -740,17 +741,18 @@ class Predictor(BasePredictor):
                 else:
                     model = self.model.to(dtype=torch.float16)
 
-                for i in range(len(image_tensor)):
+                if parallel:
+
                     kwargs = dict(
-                        inputs=input_ids[i],
-                        images=image_tensor[i],
+                        inputs=input_ids,
+                        images=image_tensor,
                         do_sample=do_sample,
                         num_beams=num_beams,
                         temperature=temperature,
                         top_p=top_p,
                         max_new_tokens=max_tokens,
                         use_cache=True,
-                        stopping_criteria=[stopping_criteria_collect[i]],
+                        stopping_criteria=[stopping_criteria],
                     )
                     if self.model_name.startswith(
                         "llava_llama3"
@@ -758,14 +760,42 @@ class Predictor(BasePredictor):
                         kwargs["image_sizes"] = image_sizes
                         # kwargs.pop("stopping_criteria")
                         kwargs["pad_token_id"] = self.tokenizer.eos_token_id
+
                     output_ids = model.generate(**kwargs)
+
                     if self.model_name.startswith("llava-v1.5"):
-                        output_ids = output_ids[:, input_ids[i].shape[1] :]
-                    outputs.append(
-                        self.tokenizer.batch_decode(
-                            output_ids, skip_special_tokens=True
-                        )[0]
+                        output_ids = output_ids[:, input_ids.shape[1] :]
+                    outputs = self.tokenizer.batch_decode(
+                        output_ids, skip_special_tokens=True
                     )
+
+                else:
+                    for i in range(len(image_tensor)):
+                        kwargs = dict(
+                            inputs=input_ids[i],
+                            images=image_tensor[i],
+                            do_sample=do_sample,
+                            num_beams=num_beams,
+                            temperature=temperature,
+                            top_p=top_p,
+                            max_new_tokens=max_tokens,
+                            use_cache=True,
+                            stopping_criteria=[stopping_criteria_collect[i]],
+                        )
+                        if self.model_name.startswith(
+                            "llava_llama3"
+                        ) or self.model_name.startswith("llava_qwen"):
+                            kwargs["image_sizes"] = image_sizes
+                            # kwargs.pop("stopping_criteria")
+                            kwargs["pad_token_id"] = self.tokenizer.eos_token_id
+                        output_ids = model.generate(**kwargs)
+                        if self.model_name.startswith("llava-v1.5"):
+                            output_ids = output_ids[:, input_ids[i].shape[1] :]
+                        outputs.append(
+                            self.tokenizer.batch_decode(
+                                output_ids, skip_special_tokens=True
+                            )[0]
+                        )
         answers = []
         for output in outputs:
             if "value\U0001F449" in output[: len(conv.roles[1])]:
