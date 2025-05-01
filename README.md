@@ -1,3 +1,8 @@
+# ImageDPO
+
+<a href="https://vilp-team.github.io/"><img src="https://img.shields.io/static/v1?label=Project&message=Website&color=red" height=20.5></a>
+<a href="https://arxiv.org/abs/2501.00569"><img src="https://img.shields.io/badge/arXiv-2501.00569-b31b1b.svg" height=20.5></a>
+
 This repository contains the implementation of our proposed ImageDPO method, introduced in our paper [Probing Visual Language Priors in VLMs](https://arxiv.org/abs/2501.00569). 
 
 Our pipeline comprises three primary components:
