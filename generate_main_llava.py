@@ -115,6 +115,7 @@ def main(name=None):
                 top_p=0.95,
                 temperature=0.5,
                 max_tokens=1024,
+                parallel=False,
             )  # we do the matching and saving per image
         except:
             batch_accumulator = 0
@@ -158,6 +159,7 @@ def main(name=None):
             temperature=0.5,
             max_tokens=1024,
             do_sample=True,
+            parallel=False,
         )
 
         for i in range(len(result_generator)):

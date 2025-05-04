@@ -82,6 +82,7 @@ class VLM_wrapper(BasePredictor):
         ),
         num_beams: int = 1,
         use_bf16: bool = False,
+        parallel: bool = False,
     ) -> str:
         return self.predictor.predict_nostreaming(
             image,
@@ -92,6 +93,7 @@ class VLM_wrapper(BasePredictor):
             do_sample,
             num_beams,
             use_bf16,
+            parallel,
         )
 
     def predict_textonly(

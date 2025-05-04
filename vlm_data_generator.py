@@ -182,6 +182,7 @@ def instruction_gen(model_tool, args):
                     temperature=0.5,  # some randomness?
                     max_tokens=512,
                     do_sample=True,
+                    parallel=True,
                 )
         else:
             instruction_result = llava_model.predict_nostreaming(
@@ -191,6 +192,7 @@ def instruction_gen(model_tool, args):
                 temperature=0.5,  # some randomness?
                 max_tokens=512,
                 do_sample=True,
+                parallel=True,
             )
         for img_index in range(len(instruction_result)):
 

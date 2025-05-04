@@ -371,207 +371,6 @@ class Predictor(BasePredictor):
             ]
         )
 
-    # def predict_nostreaming(
-    #     self,
-    #     image: list[Path] | Path = Input(description="Input image"),
-    #     prompt: list[str] | str = Input(
-    #         description="Prompt to use for text generation"
-    #     ),
-    #     top_p: float = Input(
-    #         description="When decoding text, samples from the top p percentage of most likely tokens; lower to ignore less likely tokens",
-    #         ge=0.0,
-    #         le=1.0,
-    #         default=1.0,
-    #     ),
-    #     temperature: float = Input(
-    #         description="Adjusts randomness of outputs, greater than 1 is random and 0 is deterministic",
-    #         default=0.2,
-    #         ge=0.0,
-    #     ),
-    #     max_tokens: int = Input(
-    #         description="Maximum number of tokens to generate. A word is generally 2-3 tokens",
-    #         default=1024,
-    #         ge=0,
-    #     ),
-    #     do_sample: bool = Input(
-    #         description="Whether to use sampling or greedy decoding", default=True
-    #     ),
-    #     num_beams: int = 1,
-    #     use_bf16: bool = False,  # use bf16 instead of FP16, might prevent inf or negative sampling
-    # ) -> ConcatenateIterator[str]:
-    #     """Run a single prediction on the model without streaming."""
-
-    #     if self.model_name.startswith("llava-v1.5"):
-    #         conv_mode = "llava_v1"
-    #     elif self.model_name.startswith("llava_llama3"):
-    #         conv_mode = "llava_llama_3"
-    #     elif self.model_name.startswith("llava_qwen"):
-    #         conv_mode = "qwen_1_5"  # Make sure you use correct chat template for different models
-    #     else:
-    #         raise ValueError("Unknown model name")
-
-    #     self.model.config.tokenizer_padding_side = self.tokenizer.padding_side = (
-    #         "left"
-    #     )
-    #     if isinstance(image, list):
-    #         image_data = [load_image(str(img)) for img in image]
-    #         if use_bf16:
-    #             image_tensor = [
-    #                 (
-    #                     self.image_processor.preprocess(image, return_tensors="pt")[
-    #                         "pixel_values"
-    #                     ]
-    #                     .half()
-    #                     .to(dtype=torch.bfloat16)
-    #                     .cuda()
-    #                 )
-    #                 for image in image_data
-    #             ]
-    #         else:
-    #             image_tensor = [
-    #                 (
-    #                     self.image_processor.preprocess(image, return_tensors="pt")[
-    #                         "pixel_values"
-    #                     ]
-    #                     .half()
-    #                     .cuda()
-    #                 )
-    #                 for image in image_data
-    #             ]
-    #         # image_tensor = torch.cat(image_tensor, dim=0)
-    #         self.model.config.tokenizer_padding_side = self.tokenizer.padding_side = (
-    #             "left"
-    #         )
-    #         image_sizes = [image.size for image in image_data]
-    #     else:
-    #         image_data = load_image(str(image))
-    #         if use_bf16:
-    #             image_tensor = (
-    #                 self.image_processor.preprocess(image_data, return_tensors="pt")[
-    #                     "pixel_values"
-    #                 ]
-    #                 .half()
-    #                 .to(dtype=torch.bfloat16)
-    #                 .cuda()
-    #             )
-    #         else:
-    #             image_tensor = (
-    #                 self.image_processor.preprocess(image_data, return_tensors="pt")[
-    #                     "pixel_values"
-    #                 ]
-    #                 .half()
-    #                 .cuda()
-    #             )
-    #         image_sizes = [image_data.size]
-    #     # loop start
-    #     if isinstance(prompt, list):
-    #         input_ids_collect = []
-
-    #         for sub_prompt in prompt:
-    #             conv = conv_templates[conv_mode].copy()
-    #             # just one turn, always prepend image token
-    #             inp = DEFAULT_IMAGE_TOKEN + "\n" + sub_prompt
-    #             conv.append_message(conv.roles[0], inp)
-
-    #             conv.append_message(conv.roles[1], None)
-    #             sub_prompt = conv.get_prompt()
-
-    #             input_ids = tokenizer_image_token(
-    #                 sub_prompt, self.tokenizer, IMAGE_TOKEN_INDEX, return_tensors="pt"
-    #             )
-    #             input_ids_collect.append(input_ids)
-    #         max_len = max([len(seq) for seq in input_ids_collect])
-    #         input_ids_collect = [
-    #             self.pad_sequence_to_max_length(seq.squeeze(), max_len)
-    #             for seq in input_ids_collect
-    #         ]
-    #         input_ids = torch.stack(input_ids_collect, dim=0).cuda()
-    #     else:
-    #         conv = copy.deepcopy(conv_templates[conv_mode])
-    #         # just one turn, always prepend image token
-    #         inp = DEFAULT_IMAGE_TOKEN + "\n" + prompt
-    #         conv.append_message(conv.roles[0], inp)
-
-    #         conv.append_message(conv.roles[1], None)
-    #         prompt = conv.get_prompt()
-
-    #         input_ids = (
-    #             tokenizer_image_token(
-    #                 prompt, self.tokenizer, IMAGE_TOKEN_INDEX, return_tensors="pt"
-    #             )
-    #             .unsqueeze(0)
-    #             .cuda()
-    #         )
-
-    #     stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
-    #     keywords = [stop_str]
-    #     stopping_criteria = KeywordsStoppingCriteria(
-    #         keywords, self.tokenizer, input_ids
-    #     )
-    #     outputs = []
-    #     if self.model_name.startswith("llava_qwen"):
-
-    #         outputs = []
-    #         for i in range(len(image_tensor)):
-
-    #             kwargs = dict(
-    #                 inputs=input_ids[i].unsqueeze(0),
-    #                 images=image_tensor[i],
-    #                 do_sample=do_sample,
-    #                 num_beams=num_beams,
-    #                 temperature=temperature,
-    #                 top_p=top_p,
-    #                 max_new_tokens=max_tokens,
-    #                 use_cache=True,
-    #                 image_sizes=[image_sizes[i]],
-    #                 pad_token_id=self.tokenizer.eos_token_id,
-    #             )
-    #             output_ids = self.model.generate(**kwargs)
-    #             outputs.append(
-    #                 self.tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0]
-    #             )
-    #     else:
-    #         with torch.inference_mode():
-    #             if use_bf16:
-    #                 model = self.model.to(dtype=torch.bfloat16)
-    #             else:
-    #                 model = self.model.to(dtype=torch.float16)
-
-    #             for i in range(len(image_tensor)):
-    #                 kwargs = dict(
-    #                     inputs=input_ids[i].unsqueeze(0),
-    #                     images=image_tensor[i],
-    #                     do_sample=do_sample,
-    #                     num_beams=num_beams,
-    #                     temperature=temperature,
-    #                     top_p=top_p,
-    #                     max_new_tokens=max_tokens,
-    #                     use_cache=True,
-    #                     stopping_criteria=[stopping_criteria],
-    #                 )
-    #                 if self.model_name.startswith(
-    #                     "llava_llama3"
-    #                 ) or self.model_name.startswith("llava_qwen"):
-    #                     kwargs["image_sizes"] = image_sizes
-    #                     # kwargs.pop("stopping_criteria")
-    #                     kwargs["pad_token_id"] = self.tokenizer.eos_token_id
-    #                 breakpoint()
-    #                 output_ids = model.generate(**kwargs)
-    #                 if self.model_name.startswith("llava-v1.5"):
-    #                     output_ids = output_ids[:, input_ids[i].shape[0] :]
-    #                 outputs.append(self.tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0])
-    #     answers = []
-    #     for output in outputs:
-    #         if "value\U0001F449" in output[: len(conv.roles[1])]:
-    #             output = output[len(conv.roles[1]) :].strip()
-    #         else:
-    #             output = output.strip()
-    #         if output.endswith(stop_str):
-    #             output = output[: -len(stop_str)]
-    #         answers.append(output.strip())
-    #     # self.reset_attention_overwrite_flag()
-    #     return answers
-
     def predict_nostreaming(
         self,
         image: list[Path] | Path = Input(description="Input image"),
@@ -611,7 +410,6 @@ class Predictor(BasePredictor):
             conv_mode = "qwen_1_5"  # Make sure you use correct chat template for different models
         else:
             raise ValueError("Unknown model name")
-
         self.model.config.tokenizer_padding_side = self.tokenizer.padding_side = "left"
         if isinstance(image, list):
             image_data = [load_image(str(img)) for img in image]
@@ -680,13 +478,15 @@ class Predictor(BasePredictor):
                     sub_prompt, self.tokenizer, IMAGE_TOKEN_INDEX, return_tensors="pt"
                 )
                 input_ids_collect.append(input_ids.cuda().unsqueeze(0))
-            # max_len = max([len(seq) for seq in input_ids_collect])
-            # input_ids_collect = [
-            #     self.pad_sequence_to_max_length(seq.squeeze(), max_len)
-            #     for seq in input_ids_collect
-            # ]
-            # input_ids = torch.stack(input_ids_collect, dim=0).cuda()
-            input_ids = input_ids_collect
+            if parallel:
+                max_len = max([len(seq) for seq in input_ids_collect])
+                input_ids_collect = [
+                    self.pad_sequence_to_max_length(seq.squeeze(), max_len)
+                    for seq in input_ids_collect
+                ]
+                input_ids = torch.stack(input_ids_collect, dim=0).cuda()
+            else:
+                input_ids = input_ids_collect
         else:
             conv = copy.deepcopy(conv_templates[conv_mode])
             # just one turn, always prepend image token
@@ -706,12 +506,17 @@ class Predictor(BasePredictor):
 
         stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
         keywords = [stop_str]
-        stopping_criteria_collect = []
-        for i in range(len(input_ids)):
+        if parallel:
             stopping_criteria = KeywordsStoppingCriteria(
-                keywords, self.tokenizer, input_ids[i]
+                keywords, self.tokenizer, input_ids
             )
-            stopping_criteria_collect.append(stopping_criteria)
+        else:
+            stopping_criteria_collect = []
+            for i in range(len(input_ids)):
+                stopping_criteria = KeywordsStoppingCriteria(
+                    keywords, self.tokenizer, input_ids[i]
+                )
+                stopping_criteria_collect.append(stopping_criteria)
         outputs = []
         if self.model_name.startswith("llava_qwen"):
 
@@ -762,7 +567,6 @@ class Predictor(BasePredictor):
                         kwargs["pad_token_id"] = self.tokenizer.eos_token_id
 
                     output_ids = model.generate(**kwargs)
-
                     if self.model_name.startswith("llava-v1.5"):
                         output_ids = output_ids[:, input_ids.shape[1] :]
                     outputs = self.tokenizer.batch_decode(
